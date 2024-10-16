@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Live Chat</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background: url('img/login.png') no-repeat center center fixed;
+      background-size: cover;
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+      overflow: hidden;
+    }
+
+    .login-container {
+      background: rgba(0, 0, 0, 0.7);
+      padding: 40px;
+      border-radius: 10px;
+      text-align: center;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.3);
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+
+    h1 {
+      font-size: 28px;
+      font-weight: bold;
+      margin-bottom: 20px;
+      color: #00ff00;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 100%;
+      margin-bottom: 20px;
+      border: none;
+      border-radius: 5px;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .google-signin-btn {
+      cursor: pointer;
+      margin-top: 20px;
+    }
+
+    .google-signin-btn img {
+      width: 200px;
+      transition: transform 0.3s ease;
+    }
+
+    .google-signin-btn img:hover {
+      transform: scale(1.1);
+    }
+
+    .error-message {
+      color: red;
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="login-container">
+    <h1>TURN YOUR ANGER TO POWER</h1>
+    <p class="error-message" id="error-message">Please enter your username to sign in.</p>
+    <input type="text" id="usernameInput" placeholder="Enter your username">
+    <div class="google-signin-btn" id="googleSignInBtn">
+      <img src="img/google.png" alt="Sign in with Google">
+    </div>
+  </div>
+
+  <!-- Firebase and Google Auth Script -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { getDatabase, ref, set } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+
+    // Firebase configuration (your details from previous code)
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
+      authDomain: "nex-chats-80c04.firebaseapp.com",
+      databaseURL: "https://nex-chats-80c04-default-rtdb.firebaseio.com",
+      projectId: "nex-chats-80c04",
+      storageBucket: "nex-chats-80c04.appspot.com",
+      messagingSenderId: "141566009337",
+      appId: "1:141566009337:web:c63335bd2ef19c7a816728"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const database = getDatabase(app);
+    const provider = new GoogleAuthProvider();
+
+    const googleSignInBtn = document.getElementById('googleSignInBtn');
+    const usernameInput = document.getElementById('usernameInput');
+    const errorMessage = document.getElementById('error-message');
+
+    // Google Sign-In Button Click Event
+    googleSignInBtn.addEventListener('click', () => {
+      const username = usernameInput.value.trim();
+
+      // Check if the username is entered
+      if (username === "") {
+        errorMessage.style.display = 'block'; // Show error message
+        return;
+      } else {
+        errorMessage.style.display = 'none'; // Hide error message
+      }
+
+      // Sign in with Google
+      signInWithPopup(auth, provider).then(result => {
+        const user = result.user;
+        // Save the username to Firebase with the user's ID
+        set(ref(database, 'users/' + user.uid), {
+          username: username,
+          email: user.email,
+          profilePicture: user.photoURL
+        }).then(() => {
+          // Redirect to home.html after successful login
+          window.location.href = 'home.html';
+        });
+      }).catch(error => {
+        console.error('Error during sign-in:', error);
+      });
+    });
+
+    // Auto-login if the user is already authenticated
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        window.location.href = 'home.html'; // Redirect to home.html if user is logged in
+      }
+    });
+  </script>
+</body>
+</html>

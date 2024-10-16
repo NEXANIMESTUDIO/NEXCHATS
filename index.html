@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NEX STUDIO - Login Page</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-image: url('https://e0.pxfuel.com/wallpapers/507/1022/desktop-wallpaper-love-anime-best-love-anime-and-on-chat-romantic-scenery-thumbnail.jpg');
+            background-size: cover;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            color: #ffffff;
+            text-align: center;
+        }
+
+        .container {
+            background-color: rgba(0, 0, 0, 0.7); /* semi-transparent background */
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+
+        h1 {
+            font-size: 36px;
+            margin-bottom: 20px;
+        }
+
+        .login-button {
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            outline: none;
+            padding: 10px 20px;
+            display: flex;
+            align-items: center;
+            font-size: 24px;
+            color: #00ffcc;
+            transition: transform 0.2s;
+        }
+
+        .login-button img {
+            width: 30px; /* adjust image size */
+            height: 30px;
+            margin-right: 10px; /* space between image and text */
+        }
+
+        .login-button:hover {
+            transform: scale(1.1);
+            color: #00ff66;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Welcome to NEX STUDIO</h1>
+        <button class="login-button" onclick="window.location.href='login.html'">
+            <img src="https://www.pngplay.com/wp-content/uploads/1/Login-PNG-Royalty-Free.png" alt="Login Icon"> Login
+        </button>
+    </div>
+
+</body>
+</html>

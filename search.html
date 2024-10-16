@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Search Users - Live Chat</title>
+
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #1a1a1a;
+      color: #fff;
+      overflow-x: hidden;
+      text-align: center;
+    }
+
+    /* Search Bar */
+    .search-container {
+      margin: 30px auto;
+      max-width: 500px;
+      position: relative;
+    }
+
+    .search-container input {
+      width: 100%;
+      padding: 15px;
+      border-radius: 25px;
+      border: none;
+      background-color: #333;
+      color: #fff;
+      outline: none;
+      font-size: 16px;
+    }
+
+    .search-container button {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+    }
+
+    .search-container button i {
+      font-size: 24px;
+      color: #00ff00;
+    }
+
+    /* Search Results */
+    .results-container {
+      margin-top: 20px;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
+      padding: 10px;
+    }
+
+    .user-item {
+      background-color: #333;
+      padding: 15px;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.3s ease, transform 0.3s ease;
+    }
+
+    .user-item:hover {
+      background-color: #444;
+      transform: scale(1.05);
+    }
+
+    /* Floating animation */
+    @keyframes float {
+      0% { transform: translateY(0); }
+      50% { transform: translateY(-5px); }
+      100% { transform: translateY(0); }
+    }
+
+    .user-item {
+      animation: float 3s infinite ease-in-out;
+    }
+
+    /* Error message */
+    .error {
+      color: red;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Search Bar -->
+  <div class="search-container">
+    <input type="text" id="searchInput" placeholder="Search for users...">
+    <button id="searchBtn">
+      <i class="material-icons">search</i>
+    </button>
+  </div>
+
+  <!-- Search Results -->
+  <div class="results-container" id="resultsContainer"></div>
+
+  <div id="error" class="error"></div>
+
+  <!-- Firebase and Search Functionality -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
+      authDomain: "nex-chats-80c04.firebaseapp.com",
+      databaseURL: "https://nex-chats-80c04-default-rtdb.firebaseio.com",
+      projectId: "nex-chats-80c04",
+      storageBucket: "nex-chats-80c04.appspot.com",
+      messagingSenderId: "141566009337",
+      appId: "1:141566009337:web:c63335bd2ef19c7a816728"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    const searchInput = document.getElementById('searchInput');
+    const searchBtn = document.getElementById('searchBtn');
+    const resultsContainer = document.getElementById('resultsContainer');
+    const errorDiv = document.getElementById('error');
+
+    let currentUser = null;
+
+    // Auto-login the user if they are already authenticated
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+      } else {
+        window.location.href = 'login.html'; // Redirect to login if not logged in
+      }
+    });
+
+    // Search functionality
+    searchBtn.addEventListener('click', async () => {
+      const searchTerm = searchInput.value.trim().toLowerCase();
+
+      if (!searchTerm) {
+        errorDiv.textContent = 'Please enter a username to search.';
+        return;
+      }
+
+      // Clear previous results
+      resultsContainer.innerHTML = '';
+      errorDiv.textContent = '';
+
+      // Query Firestore for users by username
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("username", ">=", searchTerm), where("username", "<=", searchTerm + '\uf8ff'));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        errorDiv.textContent = 'No users found.';
+        return;
+      }
+
+      // Display results
+      querySnapshot.forEach((doc) => {
+        const userData = doc.data();
+        const userItem = document.createElement('div');
+        userItem.classList.add('user-item');
+        userItem.textContent = userData.username;
+
+        // Add click event to initiate chat with the selected user
+        userItem.addEventListener('click', () => {
+          initiatePersonalChat(userData.userId, userData.username);
+        });
+
+        resultsContainer.appendChild(userItem);
+      });
+    });
+
+    // Function to initiate a personal chat with a user
+    async function initiatePersonalChat(otherUserId, username) {
+      const chatsRef = collection(db, "chats");
+
+      // Create or find personal chat between current user and other user
+      const q = query(chatsRef, where("members", "array-contains", currentUser.uid));
+      const querySnapshot = await getDocs(q);
+
+      let chatId = null;
+
+      querySnapshot.forEach((doc) => {
+        const chatData = doc.data();
+        if (chatData.members.includes(otherUserId)) {
+          chatId = doc.id; // Existing chat found
+        }
+      });
+
+      if (!chatId) {
+        // If no chat exists, create a new one
+        const newChatDoc = await addDoc(chatsRef, {
+          members: [currentUser.uid, otherUserId],
+          type: "personal",
+          lastMessage: "Chat started with " + username
+        });
+        chatId = newChatDoc.id;
+      }
+
+      // Redirect to the personal chat page
+      window.location.href = `chat.html?chatId=${chatId}`;
+    }
+  </script>
+
+</body>
+</html>

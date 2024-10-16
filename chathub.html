@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHAT HUB - NEX STUDIO</title>
+
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background: url('img/cbg.png') no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      color: #fff;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: space-between;
+    }
+
+    /* Title Bar */
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(20, 20, 20, 0.9);
+      padding: 15px 20px;
+      border-bottom: 2px solid #00ffcc;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .title-bar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .title-bar h2 {
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-bar i {
+      font-size: 28px;
+      cursor: pointer;
+      color: #00ffcc;
+    }
+
+    /* Chat Area */
+    .chat-area {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      max-width: 60%;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      color: #fff;
+      animation: fadeIn 0.3s ease;
+      position: relative;
+    }
+
+    .message img {
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: -10px;
+      left: -50px;
+    }
+
+    .outgoing {
+      margin-left: auto;
+      background: linear-gradient(135deg, #ff00cc 0%, #3333ff 100%);
+    }
+
+    .incoming {
+      margin-right: auto;
+      background: linear-gradient(135deg, #00ff00 0%, #0099ff 100%);
+    }
+
+    .username {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    /* Input Bar */
+    .input-bar {
+      display: flex;
+      padding: 10px;
+      background-color: rgba(20, 20, 20, 0.9);
+      position: relative;
+      border-top: 2px solid #00ffcc;
+      align-items: center;
+    }
+
+    .input-bar input {
+      flex-grow: 1;
+      padding: 12px;
+      border-radius: 25px;
+      border: none;
+      background-color: #444;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      margin-right: 10px;
+    }
+
+    .input-bar button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: #00ffcc;
+    }
+
+    .input-bar button:hover {
+      color: #00ff66;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      right: -300px;
+      top: 0;
+      width: 300px;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      padding: 20px;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .sidebar.open {
+      right: 0;
+    }
+
+    .sidebar h2 {
+      color: #00ffcc;
+      margin-bottom: 20px;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .online-users {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .online-users li {
+      padding: 15px;
+      background-color: #333;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .online-users li:hover {
+      background-color: #444;
+    }
+
+    /* Sidebar Close Button */
+    .close-sidebar {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 24px;
+      color: #fff;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Swipe Area */
+    .swipe-area-right {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 30px;
+      height: 100%;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Title Bar -->
+    <div class="title-bar">
+      <i class="material-icons" id="backBtn">arrow_back</i>
+      <h2>
+        <img src="https://cdn.dribbble.com/userupload/7299809/file/original-b4fb6699dfb8cac772536f6266696db5.jpg" alt="Group Profile">
+        CHAT HUB
+      </h2>
+      <i class="material-icons">more_vert</i>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area" id="chatArea">
+      <!-- Chat messages will be dynamically added here -->
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <button id="sendBtn"><i class="material-icons">send</i></button>
+    </div>
+
+    <!-- Swipe Area for Sidebar -->
+    <div class="swipe-area-right"></div>
+
+  </div>
+
+  <!-- Sidebar for Online Users -->
+  <div class="sidebar" id="sidebar">
+    <i class="material-icons close-sidebar" id="closeSidebarBtn">close</i>
+    <h2>Online Users</h2>
+    <ul class="online-users" id="onlineUsersList">
+      <!-- List of online users will be dynamically added here -->
+    </ul>
+  </div>
+
+  <!-- Firebase & Chat Functionality -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
+      authDomain: "nex-chats-80c04.firebaseapp.com",
+      projectId: "nex-chats-80c04",
+      storageBucket: "nex-chats-80c04.appspot.com",
+      messagingSenderId: "141566009337",
+      appId: "1:141566009337:web:c63335bd2ef19c7a816728"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+    const auth = getAuth();
+
+    let currentUser = null;
+
+    const chatArea = document.getElementById('chatArea');
+    const messageInput = document.getElementById('messageInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const sidebar = document.getElementById('sidebar');
+    const onlineUsersList = document.getElementById('onlineUsersList');
+    const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+    
+    // Detect swipe for sidebar
+    const swipeAreaRight = document.querySelector('.swipe-area-right');
+    swipeAreaRight.addEventListener('touchstart', toggleSidebar);
+    closeSidebarBtn.addEventListener('click', toggleSidebar);
+
+    function toggleSidebar() {
+      sidebar.classList.toggle('open');
+    }
+
+    // Detect authentication state
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        currentUser = user;
+        loadChat();
+        loadOnlineUsers();
+      } else {
+        // Redirect to login if user is not authenticated
+        window.location.href = 'login.html';
+      }
+    });
+
+    // Send message function
+    sendBtn.addEventListener('click', async () => {
+      const message = messageInput.value.trim();
+      if (message) {
+        try {
+          await addDoc(collection(db, 'messages'), {
+            username: currentUser.displayName || currentUser.email,
+            message: message,
+            timestamp: serverTimestamp()
+          });
+          messageInput.value = ''; // Clear the input after sending
+        } catch (error) {
+          console.error("Error sending message: ", error);
+        }
+      }
+    });
+
+    // Load chat messages from Firestore in real-time
+    function loadChat() {
+      onSnapshot(collection(db, 'messages'), (snapshot) => {
+        chatArea.innerHTML = ''; // Clear previous messages
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const messageDiv = document.createElement('div');
+          messageDiv.classList.add('message');
+          messageDiv.classList.add(data.username === (currentUser.displayName || currentUser.email) ? 'outgoing' : 'incoming');
+          
+          messageDiv.innerHTML = `
+            <div class="username">${data.username}</div>
+            <div>${data.message}</div>
+          `;
+          chatArea.appendChild(messageDiv);
+          chatArea.scrollTop = chatArea.scrollHeight; // Scroll to the bottom
+        });
+      });
+    }
+
+    // Load online users
+    function loadOnlineUsers() {
+      onSnapshot(collection(db, 'onlineUsers'), (snapshot) => {
+        onlineUsersList.innerHTML = ''; // Clear previous list
+        snapshot.forEach((doc) => {
+          const data = doc.data();
+          const userItem = document.createElement('li');
+          userItem.textContent = data.username;
+          onlineUsersList.appendChild(userItem);
+        });
+      });
+    }
+  </script>
+
+</body>
+</html>
