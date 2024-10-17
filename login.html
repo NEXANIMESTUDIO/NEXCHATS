@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login - Live Chat</title>
+  <title>NEX STUDIO - Login</title>
+
   <!-- Google Material Icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
@@ -12,11 +13,11 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
     }
 
     body {
-      background: url('img/login.png') no-repeat center center fixed;
+      background: url('https://e0.pxfuel.com/wallpapers/507/1022/desktop-wallpaper-love-anime-best-love-anime-and-on-chat-romantic-scenery-thumbnail.jpg') no-repeat center center fixed;
       background-size: cover;
       height: 100vh;
       display: flex;
@@ -24,18 +25,22 @@
       align-items: center;
       color: white;
       overflow: hidden;
+      position: relative;
     }
 
+    /* Glassmorphism Effect */
     .login-container {
-      background: rgba(0, 0, 0, 0.6);
-      padding: 40px;
+      background: rgba(0, 0, 0, 0.7);
+      padding: 50px;
       border-radius: 15px;
       text-align: center;
       box-shadow: 0 0 20px rgba(0, 255, 255, 0.4);
       animation: float 3s ease-in-out infinite;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px);
       width: 100%;
       max-width: 400px;
+      position: relative;
+      z-index: 2;
       transition: transform 0.3s ease;
     }
 
@@ -49,12 +54,19 @@
     }
 
     h1 {
-      font-size: 28px;
+      font-size: 32px;
       font-weight: bold;
       margin-bottom: 30px;
-      color: #00ff99;
-      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+      color: #00ffcc;
+      text-shadow: 0 0 10px rgba(0, 255, 255, 0.8);
       letter-spacing: 2px;
+    }
+
+    p {
+      font-size: 14px;
+      color: #ff4d4d;
+      margin-bottom: 20px;
+      display: none;
     }
 
     input[type="text"] {
@@ -81,7 +93,7 @@
     }
 
     .google-signin-btn img {
-      width: 200px;
+      width: 220px;
       transition: transform 0.3s ease;
     }
 
@@ -89,57 +101,88 @@
       transform: scale(1.1);
     }
 
-    .error-message {
-      color: red;
-      font-size: 14px;
-      margin-bottom: 10px;
-      display: none;
-    }
-
+    /* Social Media Icons */
     .social-links {
       margin-top: 30px;
       display: flex;
       justify-content: center;
-      gap: 20px;
+      gap: 30px;
+      animation: fadeInUp 1.5s ease-in-out;
     }
 
-    .social-links a {
+    .social-links i {
       color: white;
-      font-size: 30px;
-      transition: color 0.3s ease;
+      font-size: 36px;
+      transition: color 0.3s ease, transform 0.3s ease;
     }
 
-    .social-links a:hover {
-      color: #00ff99;
-    }
-
-    .social-icons img {
-      width: 40px;
-      transition: transform 0.3s ease;
-    }
-
-    .social-icons img:hover {
+    .social-links i:hover {
+      color: #00ffcc;
       transform: scale(1.2);
     }
+
+    /* Particles for the futuristic effect */
+    .particles {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+    }
+
+    .particles .particle {
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.3);
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      animation: moveParticles 10s linear infinite;
+    }
+
+    @keyframes moveParticles {
+      0% { transform: translateY(0); }
+      100% { transform: translateY(-100vh); }
+    }
+
+    /* Randomly positioning particles */
+    .particles .particle:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+    .particles .particle:nth-child(2) { top: 30%; left: 25%; animation-delay: 2s; }
+    .particles .particle:nth-child(3) { top: 50%; left: 60%; animation-delay: 4s; }
+    .particles .particle:nth-child(4) { top: 80%; left: 80%; animation-delay: 6s; }
+    .particles .particle:nth-child(5) { top: 70%; left: 40%; animation-delay: 8s; }
+
   </style>
 </head>
 <body>
 
+  <!-- Background Particle Animation -->
+  <div class="particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+  </div>
+
+  <!-- Main Container -->
   <div class="login-container">
-    <h1>TURN YOUR ANGER TO POWER</h1>
-    <p class="error-message" id="error-message">Please enter your username to sign in.</p>
+    <h1>TURN YOUR ANGER INTO POWER</h1>
+    <p id="error-message">Please enter your username to sign in.</p>
     <input type="text" id="usernameInput" placeholder="Enter your username">
+
     <div class="google-signin-btn" id="googleSignInBtn">
-      <img src="img/google.png" alt="Sign in with Google">
+      <img src="https://www.pngplay.com/wp-content/uploads/1/Login-PNG-Royalty-Free.png" alt="Sign in with Google">
     </div>
 
     <!-- Social Media Icons -->
     <div class="social-links">
       <a href="https://www.instagram.com/nexstudio" target="_blank">
-        <img src="img/instagram.png" alt="Instagram" class="social-icons">
+        <i class="material-icons">instagram</i>
       </a>
-      <a href="https://discord.gg/nexstudio" target="_blank">
-        <img src="img/discord.png" alt="Discord" class="social-icons">
+      <a href="https://wa.me/1234567890" target="_blank">
+        <i class="material-icons">whatsapp</i>
       </a>
     </div>
   </div>

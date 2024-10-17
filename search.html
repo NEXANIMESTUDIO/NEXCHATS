@@ -13,14 +13,14 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      font-family: 'Poppins', sans-serif;
     }
 
     body {
       background-color: #1a1a1a;
       color: #fff;
-      overflow-x: hidden;
       text-align: center;
+      overflow-x: hidden;
     }
 
     /* Search Bar */
@@ -58,42 +58,103 @@
 
     /* Search Results */
     .results-container {
-      margin-top: 20px;
+      margin-top: 30px;
       max-width: 500px;
       margin-left: auto;
       margin-right: auto;
-      padding: 10px;
+      padding: 20px;
+      background-color: #1f1f1f;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     }
 
-    .user-item {
+    .group-item {
+      display: flex;
+      align-items: center;
       background-color: #333;
       padding: 15px;
-      margin-bottom: 10px;
+      margin-bottom: 15px;
       border-radius: 10px;
       cursor: pointer;
       transition: background-color 0.3s ease, transform 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
     }
 
-    .user-item:hover {
+    .group-item img {
+      width: 50px;
+      height: 50px;
+      border-radius: 50%;
+      margin-right: 15px;
+    }
+
+    .group-item h3 {
+      color: #e6e6e6;
+      font-size: 18px;
+    }
+
+    .group-item:hover {
       background-color: #444;
       transform: scale(1.05);
     }
 
-    /* Floating animation */
-    @keyframes float {
-      0% { transform: translateY(0); }
-      50% { transform: translateY(-5px); }
-      100% { transform: translateY(0); }
+    /* Popup for Join Group */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background-color: #1f1f1f;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+      z-index: 200;
+      color: #fff;
+      width: 80%;
+      max-width: 400px;
+      text-align: center;
     }
 
-    .user-item {
-      animation: float 3s infinite ease-in-out;
+    .modal.active {
+      display: block;
+      animation: fadeIn 0.5s ease;
     }
 
-    /* Error message */
-    .error {
-      color: red;
+    .modal h2 {
+      font-size: 20px;
+      margin-bottom: 20px;
+    }
+
+    .modal button {
+      background-color: #00ff88;
+      color: #000;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 16px;
       margin-top: 20px;
+      transition: background-color 0.3s ease;
+    }
+
+    .modal button:hover {
+      background-color: #00cc70;
+    }
+
+    .modal-close {
+      background-color: transparent;
+      color: #ff4d4d;
+      border: none;
+      font-size: 18px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -60%); }
+      to { opacity: 1; transform: translate(-50%, -50%); }
     }
   </style>
 </head>
@@ -101,7 +162,7 @@
 
   <!-- Search Bar -->
   <div class="search-container">
-    <input type="text" id="searchInput" placeholder="Search for users...">
+    <input type="text" id="searchInput" placeholder="Search for groups...">
     <button id="searchBtn">
       <i class="material-icons">search</i>
     </button>
@@ -110,12 +171,17 @@
   <!-- Search Results -->
   <div class="results-container" id="resultsContainer"></div>
 
-  <div id="error" class="error"></div>
+  <!-- Join Group Popup -->
+  <div class="modal" id="joinGroupModal">
+    <h2>Do you want to join the group?</h2>
+    <button id="joinBtn">Join Group</button>
+    <button class="modal-close" id="closeModalBtn">Cancel</button>
+  </div>
 
   <!-- Firebase and Search Functionality -->
   <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
     // Firebase configuration
@@ -137,9 +203,11 @@
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
     const resultsContainer = document.getElementById('resultsContainer');
-    const errorDiv = document.getElementById('error');
-
+    const joinGroupModal = document.getElementById('joinGroupModal');
+    const joinBtn = document.getElementById('joinBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
     let currentUser = null;
+    let selectedGroup = null;
 
     // Auto-login the user if they are already authenticated
     onAuthStateChanged(auth, (user) => {
@@ -150,75 +218,76 @@
       }
     });
 
-    // Search functionality
+    // Search functionality for groups
     searchBtn.addEventListener('click', async () => {
       const searchTerm = searchInput.value.trim().toLowerCase();
 
-      if (!searchTerm) {
-        errorDiv.textContent = 'Please enter a username to search.';
-        return;
-      }
+      if (!searchTerm) return;
 
       // Clear previous results
       resultsContainer.innerHTML = '';
-      errorDiv.textContent = '';
 
-      // Query Firestore for users by username
-      const usersRef = collection(db, "users");
-      const q = query(usersRef, where("username", ">=", searchTerm), where("username", "<=", searchTerm + '\uf8ff'));
-      const querySnapshot = await getDocs(q);
-
-      if (querySnapshot.empty) {
-        errorDiv.textContent = 'No users found.';
-        return;
-      }
-
-      // Display results
-      querySnapshot.forEach((doc) => {
-        const userData = doc.data();
-        const userItem = document.createElement('div');
-        userItem.classList.add('user-item');
-        userItem.textContent = userData.username;
-
-        // Add click event to initiate chat with the selected user
-        userItem.addEventListener('click', () => {
-          initiatePersonalChat(userData.userId, userData.username);
+      // Simulate search for "Dawnland" group
+      if (searchTerm === 'dawnland') {
+        displayGroup({
+          groupName: 'DAWNLAND',
+          groupId: 'dawnland',
+          profilePicture: 'https://www.example.com/dawnland_profile_image.jpg'
         });
-
-        resultsContainer.appendChild(userItem);
-      });
+      } else {
+        resultsContainer.innerHTML = '<p>No groups found.</p>';
+      }
     });
 
-    // Function to initiate a personal chat with a user
-    async function initiatePersonalChat(otherUserId, username) {
-      const chatsRef = collection(db, "chats");
-
-      // Create or find personal chat between current user and other user
-      const q = query(chatsRef, where("members", "array-contains", currentUser.uid));
-      const querySnapshot = await getDocs(q);
-
-      let chatId = null;
-
-      querySnapshot.forEach((doc) => {
-        const chatData = doc.data();
-        if (chatData.members.includes(otherUserId)) {
-          chatId = doc.id; // Existing chat found
-        }
+    // Display a group in the results
+    function displayGroup(groupData) {
+      const groupItem = document.createElement('div');
+      groupItem.classList.add('group-item');
+      groupItem.innerHTML = `
+        <img src="${groupData.profilePicture}" alt="${groupData.groupName} Profile">
+        <h3>${groupData.groupName}</h3>
+      `;
+    
+      // Add click event to show popup
+      groupItem.addEventListener('click', () => {
+        selectedGroup = groupData;
+        joinGroupModal.classList.add('active');
       });
-
-      if (!chatId) {
-        // If no chat exists, create a new one
-        const newChatDoc = await addDoc(chatsRef, {
-          members: [currentUser.uid, otherUserId],
-          type: "personal",
-          lastMessage: "Chat started with " + username
-        });
-        chatId = newChatDoc.id;
-      }
-
-      // Redirect to the personal chat page
-      window.location.href = `chat.html?chatId=${chatId}`;
+    
+      resultsContainer.appendChild(groupItem);
     }
+    
+    // Simulate search for "Dawnland" group
+    if (searchTerm === 'dawnland') {
+      displayGroup({
+        groupName: 'DAWNLAND',
+        groupId: 'dawnland',
+        profilePicture: 'https://cdn.dribbble.com/userupload/4362414/file/original-3a2e83227f22bfc2dbda1dd8da5d8692.png'
+      });
+    }
+
+    // Join group functionality
+    joinBtn.addEventListener('click', async () => {
+      if (selectedGroup) {
+        // Save the group to the user's home page in Firestore
+        await addDoc(collection(db, 'userGroups'), {
+          userId: currentUser.uid,
+          groupId: selectedGroup.groupId,
+          groupName: selectedGroup.groupName,
+          profilePicture: selectedGroup.profilePicture
+        });
+
+        // Redirect to the group chat page
+        window.location.href = `dawnland.html`; // Redirect to the group's chat page
+      }
+      // Close the modal after joining the group
+      joinGroupModal.classList.remove('active');
+    });
+
+    // Close modal functionality
+    closeModalBtn.addEventListener('click', () => {
+      joinGroupModal.classList.remove('active');
+    });
   </script>
 
 </body>

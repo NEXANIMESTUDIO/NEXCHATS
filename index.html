@@ -5,29 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NEX STUDIO - Login Page</title>
     <style>
-        body {
+        * {
             margin: 0;
             padding: 0;
-            background-image: url('https://e0.pxfuel.com/wallpapers/507/1022/desktop-wallpaper-love-anime-best-love-anime-and-on-chat-romantic-scenery-thumbnail.jpg');
-            background-size: cover;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
+            background-image: url('https://e0.pxfuel.com/wallpapers/507/1022/desktop-wallpaper-love-anime-best-love-anime-and-on-chat-romantic-scenery-thumbnail.jpg');
+            background-size: cover;
+            background-position: center;
+            overflow: hidden;
             color: #ffffff;
-            text-align: center;
+            position: relative;
+        }
+
+        /* Adding a blur overlay for a futuristic effect */
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Dark overlay */
+            backdrop-filter: blur(10px); /* Blur effect */
         }
 
         .container {
-            background-color: rgba(0, 0, 0, 0.7); /* semi-transparent background */
-            padding: 40px;
+            position: relative;
+            background-color: rgba(0, 0, 0, 0.8); /* Semi-transparent background */
+            padding: 50px;
             border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+            text-align: center;
+            z-index: 1;
+            animation: fadeIn 1.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; transform: translateY(-20px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
 
         h1 {
-            font-size: 36px;
-            margin-bottom: 20px;
+            font-size: 42px;
+            margin-bottom: 15px;
+            color: #00ffcc;
+            text-shadow: 0 0 10px #00ffcc;
+        }
+
+        p {
+            font-size: 18px;
+            margin-bottom: 30px;
+            color: #ffffff;
+            letter-spacing: 1px;
         }
 
         .login-button {
@@ -35,33 +72,119 @@
             border: none;
             cursor: pointer;
             outline: none;
-            padding: 10px 20px;
-            display: flex;
+            padding: 15px 30px;
+            display: inline-flex;
             align-items: center;
             font-size: 24px;
             color: #00ffcc;
-            transition: transform 0.2s;
+            transition: transform 0.3s ease, color 0.3s ease;
         }
 
         .login-button img {
-            width: 30px; /* adjust image size */
-            height: 30px;
-            margin-right: 10px; /* space between image and text */
+            width: 35px;
+            height: 35px;
+            margin-right: 15px;
         }
 
         .login-button:hover {
             transform: scale(1.1);
             color: #00ff66;
         }
+
+        .features {
+            margin-top: 40px;
+            text-align: left;
+        }
+
+        .features li {
+            list-style: none;
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            color: #00ffcc;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        .features li::before {
+            content: '★';
+            position: absolute;
+            left: 0;
+            color: #00ff88;
+            font-size: 18px;
+            transition: color 0.3s;
+        }
+
+        .features li:hover::before {
+            color: #ff66ff;
+        }
+
+        .container:hover h1 {
+            color: #ff66ff;
+            text-shadow: 0 0 15px #ff66ff;
+        }
+
+        /* Adding subtle particle animation in the background */
+        .particles {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        @keyframes moveParticles {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-500px); }
+        }
+
+        .particles .particle {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.3);
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            animation: moveParticles 15s linear infinite;
+        }
+
+        /* Randomly positioning particles */
+        .particles .particle:nth-child(1) { top: 10%; left: 5%; animation-delay: 0s; }
+        .particles .particle:nth-child(2) { top: 30%; left: 20%; animation-delay: 2s; }
+        .particles .particle:nth-child(3) { top: 50%; left: 40%; animation-delay: 4s; }
+        .particles .particle:nth-child(4) { top: 60%; left: 70%; animation-delay: 6s; }
+        .particles .particle:nth-child(5) { top: 80%; left: 85%; animation-delay: 8s; }
+
     </style>
 </head>
 <body>
 
+    <!-- Background Particle Animation -->
+    <div class="particles">
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+        <div class="particle"></div>
+    </div>
+
+    <!-- Main Container for Login -->
     <div class="container">
         <h1>Welcome to NEX STUDIO</h1>
+        <p>Unleash your creativity and join the future of communication.</p>
+        
         <button class="login-button" onclick="window.location.href='login.html'">
-            <img src="https://www.pngplay.com/wp-content/uploads/1/Login-PNG-Royalty-Free.png" alt="Login Icon"> Login
+            <img src="https://www.pngplay.com/wp-content/uploads/1/Login-PNG-Royalty-Free.png" alt="Login Icon"> Login Now
         </button>
+
+        <ul class="features">
+            <li>✔ Chat with friends in real-time</li>
+            <li>✔ Create personalized chat groups</li>
+            <li>✔ Share your favorite moments and media</li>
+            <li>✔ Unlock exclusive content and events</li>
+        </ul>
     </div>
 
 </body>

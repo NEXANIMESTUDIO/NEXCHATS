@@ -152,87 +152,6 @@
       50% { transform: translateY(-5px); }
       100% { transform: translateY(0); }
     }
-
-    /* Plus Icon for Group Creation */
-    .add-group-btn {
-      position: fixed;
-      bottom: 80px;
-      right: 20px;
-      background-color: #00ff88;
-      color: #fff;
-      width: 60px;
-      height: 60px;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 36px;
-      cursor: pointer;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
-      transition: transform 0.3s ease;
-    }
-
-    .add-group-btn:hover {
-      transform: scale(1.1);
-    }
-
-    /* Group Creation Popup */
-    .modal {
-      display: none;
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      background-color: #1f1f1f;
-      padding: 30px;
-      border-radius: 10px;
-      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-      z-index: 200;
-      color: #fff;
-      width: 80%;
-      max-width: 400px;
-    }
-
-    .modal.active {
-      display: block;
-    }
-
-    .modal h2 {
-      font-size: 20px;
-      margin-bottom: 20px;
-      text-align: center;
-    }
-
-    .modal input, .modal textarea {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border-radius: 5px;
-      border: none;
-      background-color: #292929;
-      color: #fff;
-    }
-
-    .modal button {
-      background-color: #00ff88;
-      color: #000;
-      border: none;
-      padding: 10px;
-      width: 100%;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
-
-    .modal button:hover {
-      background-color: #00cc70;
-    }
-
-    /* Animation */
-    @keyframes modalFadeIn {
-      from { opacity: 0; transform: translate(-50%, -60%); }
-      to { opacity: 1; transform: translate(-50%, -50%); }
-    }
   </style>
 </head>
 <body>
@@ -253,24 +172,8 @@
       <div class="unread-count">3</div> <!-- Unread message counter -->
     </div>
 
-    <!-- Dynamic Group Section (Created Groups) -->
+    <!-- Dynamic Group Section (Joined Groups) -->
     <div id="groupSection"></div>
-  </div>
-
-  <!-- Plus Icon to Create Group -->
-  <div class="add-group-btn" id="addGroupBtn">
-    <i class="material-icons">add</i>
-  </div>
-
-  <!-- Group Creation Modal -->
-  <div class="modal" id="groupModal">
-    <h2>Create Group</h2>
-    <input type="text" id="groupName" placeholder="Enter Group Name">
-    <input type="text" id="groupId" placeholder="Enter Group ID (for searching)">
-    <textarea id="groupDescription" placeholder="Enter Group Description"></textarea>
-    <label for="groupProfile">Select Group Profile Picture</label>
-    <input type="file" id="groupProfile" accept="image/*">
-    <button id="createGroupBtn">Create Group</button>
   </div>
 
   <!-- Bottom Navigation similar to WhatsApp -->
@@ -293,32 +196,12 @@
     </div>
   </div>
 
-  <!-- Script for Navigation and Group Creation -->
+  <!-- Firebase and Group Join Functionality -->
   <script type="module">
-    // Navigation Click Handlers
-    const notificationIcon = document.getElementById('notificationIcon');
-    const searchIcon = document.getElementById('searchIcon');
-    const chatHub = document.getElementById('chatHub');
-    const chatNav = document.getElementById('chatNav');
-    const storyNav = document.getElementById('storyNav');
-    const gamesNav = document.getElementById('gamesNav');
-    const profileNav = document.getElementById('profileNav');
-
-    // Modal and group elements
-    const addGroupBtn = document.getElementById('addGroupBtn');
-    const groupModal = document.getElementById('groupModal');
-    const createGroupBtn = document.getElementById('createGroupBtn');
-    const groupNameInput = document.getElementById('groupName');
-    const groupIdInput = document.getElementById('groupId');
-    const groupDescriptionInput = document.getElementById('groupDescription');
-    const groupProfileInput = document.getElementById('groupProfile');
-    const groupSection = document.getElementById('groupSection');
-
     // Firebase configuration
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, getDocs, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+    import { getFirestore, collection, query, where, getDocs, onSnapshot } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
     import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
     const firebaseConfig = {
       apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
@@ -330,11 +213,12 @@
       appId: "1:141566009337:web:c63335bd2ef19c7a816728"
     };
 
+    // Initialize Firebase
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const storage = getStorage(app);
     const auth = getAuth();
 
+    const groupSection = document.getElementById('groupSection');
     let currentUser = null;
 
     // Firebase Auth to get the current user
@@ -347,54 +231,9 @@
       }
     });
 
-    // Show modal when add group button is clicked
-    addGroupBtn.addEventListener('click', () => {
-      groupModal.classList.add('active');
-    });
-
-    // Function to handle group creation
-    createGroupBtn.addEventListener('click', async () => {
-      const groupName = groupNameInput.value.trim();
-      const groupId = groupIdInput.value.trim();
-      const groupDescription = groupDescriptionInput.value.trim();
-      const groupProfileFile = groupProfileInput.files[0];
-
-      if (groupName && groupId && groupDescription && groupProfileFile) {
-        try {
-          // Upload group profile picture to Firebase Storage
-          const storageRef = ref(storage, `groupProfiles/${groupProfileFile.name}`);
-          await uploadBytes(storageRef, groupProfileFile);
-          const groupProfileUrl = await getDownloadURL(storageRef);
-
-          // Add group details to Firestore
-          await addDoc(collection(db, 'groups'), {
-            groupName,
-            groupId,
-            groupDescription,
-            groupProfileUrl,
-            createdBy: currentUser.uid,
-          });
-
-          // Close modal and reset inputs
-          groupModal.classList.remove('active');
-          groupNameInput.value = '';
-          groupIdInput.value = '';
-          groupDescriptionInput.value = '';
-          groupProfileInput.value = '';
-          
-          // Reload the groups
-          loadGroups();
-        } catch (error) {
-          console.error('Error creating group:', error);
-        }
-      } else {
-        alert('Please fill all the fields and select a profile picture.');
-      }
-    });
-
-    // Function to load groups for the current user
+    // Function to load joined groups for the current user
     function loadGroups() {
-      const q = query(collection(db, 'groups'), where('createdBy', '==', currentUser.uid));
+      const q = query(collection(db, 'userGroups'), where('userId', '==', currentUser.uid));
       onSnapshot(q, (snapshot) => {
         groupSection.innerHTML = ''; // Clear existing groups
         snapshot.forEach((doc) => {
@@ -408,14 +247,57 @@
 
           // Add click event to navigate to the group chat page
           groupElement.addEventListener('click', () => {
+            // Redirect to the group's chat page with the groupId in the query parameters
             window.location.href = `groupchat.html?groupId=${group.groupId}`;
           });
 
-          // Append to group section
+          // Append the group element to the group section
           groupSection.appendChild(groupElement);
         });
       });
     }
+
+    // Navigation Click Handlers
+    const notificationIcon = document.getElementById('notificationIcon');
+    const searchIcon = document.getElementById('searchIcon');
+    const chatHub = document.getElementById('chatHub');
+    const chatNav = document.getElementById('chatNav');
+    const storyNav = document.getElementById('storyNav');
+    const gamesNav = document.getElementById('gamesNav');
+    const profileNav = document.getElementById('profileNav');
+
+    // Navigate to Notification Page
+    notificationIcon.addEventListener('click', () => {
+      window.location.href = 'notification.html';
+    });
+
+    // Navigate to Search Page
+    searchIcon.addEventListener('click', () => {
+      window.location.href = 'search.html';
+    });
+
+    // Navigate to Chat Hub Page
+    chatHub.addEventListener('click', () => {
+      window.location.href = 'chathub.html';
+    });
+
+    // Bottom Navigation Click Events
+    chatNav.addEventListener('click', () => {
+      window.location.href = 'chat.html';
+    });
+
+    storyNav.addEventListener('click', () => {
+      window.location.href = 'story.html';
+    });
+
+    gamesNav.addEventListener('click', () => {
+      window.location.href = 'games.html';
+    });
+
+    profileNav.addEventListener('click', () => {
+      window.location.href = 'profile.html';
+    });
+
   </script>
 
 </body>
