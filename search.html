@@ -171,124 +171,119 @@
   <!-- Search Results -->
   <div class="results-container" id="resultsContainer"></div>
 
-  <!-- Join Group Popup -->
-  <div class="modal" id="joinGroupModal">
-    <h2>Do you want to join the group?</h2>
-    <button id="joinBtn">Join Group</button>
-    <button class="modal-close" id="closeModalBtn">Cancel</button>
-  </div>
+<!-- Join Group Popup -->
+<div class="modal" id="joinGroupModal">
+  <h2>Do you want to join the group?</h2>
+  <button id="joinBtn">Join Group</button>
+  <button class="modal-close" id="closeModalBtn">Cancel</button>
+</div>
 
-  <!-- Firebase and Search Functionality -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+<!-- Firebase and Search Functionality -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getFirestore, collection, query, where, getDocs, addDoc } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
 
-    // Firebase configuration
-    const firebaseConfig = {
-      apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
-      authDomain: "nex-chats-80c04.firebaseapp.com",
-      databaseURL: "https://nex-chats-80c04-default-rtdb.firebaseio.com",
-      projectId: "nex-chats-80c04",
-      storageBucket: "nex-chats-80c04.appspot.com",
-      messagingSenderId: "141566009337",
-      appId: "1:141566009337:web:c63335bd2ef19c7a816728"
-    };
+  // Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
+    authDomain: "nex-chats-80c04.firebaseapp.com",
+    databaseURL: "https://nex-chats-80c04-default-rtdb.firebaseio.com",
+    projectId: "nex-chats-80c04",
+    storageBucket: "nex-chats-80c04.appspot.com",
+    messagingSenderId: "141566009337",
+    appId: "1:141566009337:web:c63335bd2ef19c7a816728"
+  };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth();
 
-    const searchInput = document.getElementById('searchInput');
-    const searchBtn = document.getElementById('searchBtn');
-    const resultsContainer = document.getElementById('resultsContainer');
-    const joinGroupModal = document.getElementById('joinGroupModal');
-    const joinBtn = document.getElementById('joinBtn');
-    const closeModalBtn = document.getElementById('closeModalBtn');
-    let currentUser = null;
-    let selectedGroup = null;
+  const searchInput = document.getElementById('searchInput');
+  const searchBtn = document.getElementById('searchBtn');
+  const resultsContainer = document.getElementById('resultsContainer');
+  const joinGroupModal = document.getElementById('joinGroupModal');
+  const joinBtn = document.getElementById('joinBtn');
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  let currentUser = null;
+  let selectedGroup = null;
 
-    // Auto-login the user if they are already authenticated
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user;
-      } else {
-        window.location.href = 'login.html'; // Redirect to login if not logged in
-      }
-    });
-
-    // Search functionality for groups
-    searchBtn.addEventListener('click', async () => {
-      const searchTerm = searchInput.value.trim().toLowerCase();
-
-      if (!searchTerm) return;
-
-      // Clear previous results
-      resultsContainer.innerHTML = '';
-
-      // Simulate search for "Dawnland" group
-      if (searchTerm === 'dawnland') {
-        displayGroup({
-          groupName: 'DAWNLAND',
-          groupId: 'dawnland',
-          profilePicture: 'https://www.example.com/dawnland_profile_image.jpg'
-        });
-      } else {
-        resultsContainer.innerHTML = '<p>No groups found.</p>';
-      }
-    });
-
-    // Display a group in the results
-    function displayGroup(groupData) {
-      const groupItem = document.createElement('div');
-      groupItem.classList.add('group-item');
-      groupItem.innerHTML = `
-        <img src="${groupData.profilePicture}" alt="${groupData.groupName} Profile">
-        <h3>${groupData.groupName}</h3>
-      `;
-    
-      // Add click event to show popup
-      groupItem.addEventListener('click', () => {
-        selectedGroup = groupData;
-        joinGroupModal.classList.add('active');
-      });
-    
-      resultsContainer.appendChild(groupItem);
+  // Auto-login the user if they are already authenticated
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+    } else {
+      window.location.href = 'login.html'; // Redirect to login if not logged in
     }
-    
-    // Simulate search for "Dawnland" group
+  });
+
+  // Search functionality for groups
+  searchBtn.addEventListener('click', async () => {
+    const searchTerm = searchInput.value.trim().toLowerCase();
+
+    if (!searchTerm) return;
+
+    // Clear previous results
+    resultsContainer.innerHTML = '';
+
+    // Simulate search for groups
     if (searchTerm === 'dawnland') {
       displayGroup({
         groupName: 'DAWNLAND',
         groupId: 'dawnland',
+        profilePicture: 'https://www.example.com/dawnland_profile_image.jpg'
+      });
+    } else if (searchTerm === 'ghost.ind') {
+      displayGroup({
+        groupName: 'TEAM GHOST',
+        groupId: 'ghost.id',
         profilePicture: 'https://cdn.dribbble.com/userupload/4362414/file/original-3a2e83227f22bfc2dbda1dd8da5d8692.png'
       });
+    } else {
+      resultsContainer.innerHTML = '<p>No groups found.</p>';
     }
+  });
 
-    // Join group functionality
-    joinBtn.addEventListener('click', async () => {
-      if (selectedGroup) {
-        // Save the group to the user's home page in Firestore
-        await addDoc(collection(db, 'userGroups'), {
-          userId: currentUser.uid,
-          groupId: selectedGroup.groupId,
-          groupName: selectedGroup.groupName,
-          profilePicture: selectedGroup.profilePicture
-        });
+  // Display a group in the results
+  function displayGroup(groupData) {
+    const groupItem = document.createElement('div');
+    groupItem.classList.add('group-item');
+    groupItem.innerHTML = `
+      <img src="${groupData.profilePicture}" alt="${groupData.groupName} Profile">
+      <h3>${groupData.groupName}</h3>
+    `;
 
-        // Redirect to the group chat page
-        window.location.href = `dawnland.html`; // Redirect to the group's chat page
-      }
-      // Close the modal after joining the group
-      joinGroupModal.classList.remove('active');
+    // Add click event to show popup
+    groupItem.addEventListener('click', () => {
+      selectedGroup = groupData;
+      joinGroupModal.classList.add('active');
     });
 
-    // Close modal functionality
-    closeModalBtn.addEventListener('click', () => {
-      joinGroupModal.classList.remove('active');
-    });
-  </script>
+    resultsContainer.appendChild(groupItem);
+  }
 
+  // Join group functionality
+  joinBtn.addEventListener('click', async () => {
+    if (selectedGroup) {
+      // Save the group to the user's home page in Firestore
+      await addDoc(collection(db, 'userGroups'), {
+        userId: currentUser.uid,
+        groupId: selectedGroup.groupId,
+        groupName: selectedGroup.groupName,
+        profilePicture: selectedGroup.profilePicture
+      });
+
+      // Redirect to home and close the modal
+      joinGroupModal.classList.remove('active');
+      window.location.href = 'home.html'; // Redirect to the home page
+    }
+  });
+
+  // Close modal functionality
+  closeModalBtn.addEventListener('click', () => {
+    joinGroupModal.classList.remove('active');
+  });
+</script>
 </body>
 </html>

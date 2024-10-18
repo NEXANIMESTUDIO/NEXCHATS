@@ -234,26 +234,41 @@
     // Function to load joined groups for the current user
     function loadGroups() {
       const q = query(collection(db, 'userGroups'), where('userId', '==', currentUser.uid));
+    
+      // Show a loading message or spinner while fetching groups
+      groupSection.innerHTML = '<p>Loading groups...</p>';
+    
       onSnapshot(q, (snapshot) => {
-        groupSection.innerHTML = ''; // Clear existing groups
-        snapshot.forEach((doc) => {
-          const group = doc.data();
-          const groupElement = document.createElement('div');
-          groupElement.classList.add('chat-option');
-          groupElement.innerHTML = `
-            <h2>${group.groupName}</h2>
-            <div class="unread-count">0</div> <!-- Unread message counter (can be updated dynamically) -->
-          `;
-
-          // Add click event to navigate to the group chat page
-          groupElement.addEventListener('click', () => {
-            // Redirect to the group's chat page with the groupId in the query parameters
-            window.location.href = `groupchat.html?groupId=${group.groupId}`;
+        groupSection.innerHTML = ''; // Clear existing groups after loading
+    
+        if (snapshot.empty) {
+          // Display a message if no groups are found
+          groupSection.innerHTML = '<p>No groups found. Join groups to start chatting.</p>';
+        } else {
+          snapshot.forEach((doc) => {
+            const group = doc.data();
+            const groupElement = document.createElement('div');
+            groupElement.classList.add('chat-option');
+    
+            // Add group profile image if available, or default image
+            groupElement.innerHTML = `
+              <div style="display: flex; align-items: center;">
+                <img src="${group.profilePicture || 'default-profile.png'}" alt="${group.groupName} Profile" style="width: 50px; height: 50px; border-radius: 50%; margin-right: 15px;">
+                <h2>${group.groupName}</h2>
+              </div>
+              <div class="unread-count">0</div> <!-- Placeholder for unread message counter -->
+            `;
+    
+            // Add click event to navigate to the group chat page
+            groupElement.addEventListener('click', () => {
+              // Redirect to the group's chat page with the groupId in the query parameters
+              window.location.href = `groupchat.html?groupId=${group.groupId}`;
+            });
+    
+            // Append the group element to the group section
+            groupSection.appendChild(groupElement);
           });
-
-          // Append the group element to the group section
-          groupSection.appendChild(groupElement);
-        });
+        }
       });
     }
 
@@ -301,4 +316,4 @@
   </script>
 
 </body>
-</html>
+</html>=

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHAT HUB - NEX STUDIO</title>
+
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background: url('https://play-lh.googleusercontent.com/FBxxJV5HpHA5Ha0TIgaRyFLz6_o4rWeOwrFrKhSl_9ZA-2xDJ6xwOs8XM_hm6SQVeqU=w526-h296-rw') no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      color: #fff;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: space-between;
+    }
+
+    /* Title Bar */
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(20, 20, 20, 0.9);
+      padding: 15px 20px;
+      border-bottom: 2px solid #00ffcc;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .title-bar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .title-bar h2 {
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-bar i {
+      font-size: 28px;
+      cursor: pointer;
+      color: #00ffcc;
+    }
+
+    /* Chat Area */
+    .chat-area {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      max-width: 60%;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      color: #fff;
+      animation: fadeIn 0.3s ease;
+      position: relative;
+    }
+
+    .message img {
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: -10px;
+      left: -50px;
+    }
+
+    .outgoing {
+      margin-left: auto;
+      background: linear-gradient(135deg, #ff00cc 0%, #3333ff 100%);
+    }
+
+    .incoming {
+      margin-right: auto;
+      background: linear-gradient(135deg, #00ff00 0%, #0099ff 100%);
+    }
+
+    .username {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    /* Input Bar */
+    .input-bar {
+      display: flex;
+      padding: 10px;
+      background-color: rgba(20, 20, 20, 0.9);
+      position: relative;
+      border-top: 2px solid #00ffcc;
+      align-items: center;
+    }
+
+    .input-bar input {
+      flex-grow: 1;
+      padding: 12px;
+      border-radius: 25px;
+      border: none;
+      background-color: #444;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      margin-right: 10px;
+    }
+
+    .input-bar button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: #00ffcc;
+    }
+
+    .input-bar button:hover {
+      color: #00ff66;
+    }
+
+    /* Image Upload Button */
+    .input-bar #imageUpload {
+      font-size: 24px;
+      cursor: pointer;
+      margin-right: 10px;
+      color: #00ffcc;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      position: fixed;
+      right: -300px;
+      top: 0;
+      width: 300px;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+      padding: 20px;
+      transition: all 0.3s ease;
+      z-index: 1000;
+    }
+
+    .sidebar.open {
+      right: 0;
+    }
+
+    .sidebar h2 {
+      color: #00ffcc;
+      margin-bottom: 20px;
+      font-size: 24px;
+      text-align: center;
+    }
+
+    .online-users {
+      list-style-type: none;
+      padding: 0;
+    }
+
+    .online-users li {
+      padding: 15px;
+      background-color: #333;
+      margin-bottom: 10px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #fff;
+    }
+
+    .online-users li:hover {
+      background-color: #444;
+    }
+
+    /* Sidebar Close Button */
+    .close-sidebar {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      cursor: pointer;
+      font-size: 24px;
+      color: #fff;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    /* Swipe Area */
+    .swipe-area-right {
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 30px;
+      height: 100%;
+      z-index: 100;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Title Bar -->
+    <div class="title-bar">
+      <i class="material-icons" id="backBtn">arrow_back</i>
+      <h2>
+        <img src="https://play-lh.googleusercontent.com/FBxxJV5HpHA5Ha0TIgaRyFLz6_o4rWeOwrFrKhSl_9ZA-2xDJ6xwOs8XM_hm6SQVeqU=w526-h296-rw" alt="Group Profile">
+        DAWNLAND
+      </h2>
+      <i class="material-icons">more_vert</i>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area" id="chatArea">
+      <!-- Chat messages will be dynamically added here -->
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <label for="imageInput">
+        <i class="material-icons" id="imageUpload">image</i>
+      </label>
+      <input type="file" id="imageInput" style="display: none;">
+      <button id="sendBtn"><i class="material-icons">send</i></button>
+    </div>
+
+    <!-- Swipe Area for Sidebar -->
+    <div class="swipe-area-right"></div>
+
+  </div>
+
+  <!-- Sidebar for Online Users -->
+  <div class="sidebar" id="sidebar">
+    <i class="material-icons close-sidebar" id="closeSidebarBtn">close</i>
+    <h2>Online Users</h2>
+    <ul class="online-users" id="onlineUsersList">
+      <!-- List of online users will be dynamically added here -->
+    </ul>
+  </div>
+
+  <!-- Firebase & Chat Functionality -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
+    authDomain: "nex-chats-80c04.firebaseapp.com",
+    projectId: "nex-chats-80c04",
+    storageBucket: "nex-chats-80c04.appspot.com",
+    messagingSenderId: "141566009337",
+    appId: "1:141566009337:web:c63335bd2ef19c7a816728"
+  };
+
+  // Initialize Firebase and Firestore
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth();
+  const storage = getStorage(app);
+
+  let currentUser = null;
+
+  const chatArea = document.getElementById('chatArea');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const imageInput = document.getElementById('imageInput');
+  const sidebar = document.getElementById('sidebar');
+  const closeSidebarBtn = document.getElementById('closeSidebarBtn');
+  const onlineUsersList = document.getElementById('onlineUsersList');
+
+  // Function to add a chat message to the chat area
+  function addMessage(message, isOutgoing) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message', isOutgoing ? 'outgoing' : 'incoming');
+    
+    const usernameDiv = document.createElement('div');
+    usernameDiv.classList.add('username');
+    usernameDiv.innerText = currentUser ? currentUser.displayName : 'Anonymous';
+    
+    const messageContent = document.createElement('div');
+    messageContent.innerText = message.text || '';
+    
+    if (message.image) {
+      const img = document.createElement('img');
+      img.src = message.image;
+      messageContent.appendChild(img);
+    }
+
+    messageDiv.appendChild(usernameDiv);
+    messageDiv.appendChild(messageContent);
+    chatArea.appendChild(messageDiv);
+    chatArea.scrollTop = chatArea.scrollHeight; // Scroll to bottom
+  }
+
+  // Send message function
+  async function sendMessage() {
+    const text = messageInput.value.trim();
+    if (text || imageInput.files.length > 0) {
+      const messageData = {
+        text: text,
+        timestamp: serverTimestamp(),
+        userId: currentUser.uid,
+      };
+
+      // Handle image upload if an image is selected
+      if (imageInput.files.length > 0) {
+        const file = imageInput.files[0];
+        const storageRef = ref(storage, `chat-images/${file.name}`);
+        await uploadBytes(storageRef, file);
+        const imageUrl = await getDownloadURL(storageRef);
+        messageData.image = imageUrl;
+      }
+
+      // Add message to Firestore
+      await addDoc(collection(db, 'messages'), messageData);
+      messageInput.value = ''; // Clear input
+      imageInput.value = ''; // Clear image input
+    }
+  }
+
+  // Load chat messages
+  function loadMessages() {
+    const q = query(collection(db, 'messages'), orderBy('timestamp'));
+    onSnapshot(q, (querySnapshot) => {
+      chatArea.innerHTML = ''; // Clear chat area
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        const isOutgoing = data.userId === currentUser.uid;
+        addMessage(data, isOutgoing);
+      });
+    });
+  }
+
+  // Toggle sidebar visibility
+  function toggleSidebar() {
+    sidebar.classList.toggle('open');
+  }
+
+  // Close sidebar
+  closeSidebarBtn.addEventListener('click', toggleSidebar);
+
+  // Back button to go back (if applicable)
+  document.getElementById('backBtn').addEventListener('click', () => {
+    window.history.back();
+  });
+
+  // Send button event listener
+  sendBtn.addEventListener('click', sendMessage);
+
+  // Enter key sends the message
+  messageInput.addEventListener('keypress', (event) => {
+    if (event.key === 'Enter') {
+      sendMessage();
+    }
+  });
+
+  // Firebase authentication state observer
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user;
+      loadMessages();
+      // Load online users
+      loadOnlineUsers();
+    } else {
+      // Redirect to login page or show a login modal
+      window.location.href = 'login.html'; // Redirect to your login page
+    }
+  });
+
+  // Load online users (you can implement your logic for online users)
+  function loadOnlineUsers() {
+    // This is a placeholder; you need to implement real online user tracking
+    const users = ['User1', 'User2', 'User3']; // Example user list
+    onlineUsersList.innerHTML = ''; // Clear the list
+    users.forEach((user) => {
+      const li = document.createElement('li');
+      li.innerText = user;
+      onlineUsersList.appendChild(li);
+    });
+  }
+
+  // Initialize Firebase services
+  loadMessages();
+</script>
+
+</body>
+</html>
