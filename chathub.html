@@ -183,165 +183,135 @@
 
   <!-- Firebase SDK -->
   <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-    import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
 
-    const firebaseConfig = {
-      apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
-      authDomain: "nex-chats-80c04.firebaseapp.com",
-      projectId: "nex-chats-80c04",
-      storageBucket: "nex-chats-80c04.appspot.com",
-      messagingSenderId: "141566009337",
-      appId: "1:141566009337:web:c63335bd2ef19c7a816728"
+  const firebaseConfig = {
+    apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
+    authDomain: "nex-chats-80c04.firebaseapp.com",
+    projectId: "nex-chats-80c04",
+    storageBucket: "nex-chats-80c04.appspot.com",
+    messagingSenderId: "141566009337",
+    appId: "1:141566009337:web:c63335bd2ef19c7a816728"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  const auth = getAuth();
+  const storage = getStorage(app);
+
+  let currentUser = null;
+
+  const chatArea = document.getElementById('chatArea');
+  const messageInput = document.getElementById('messageInput');
+  const sendBtn = document.getElementById('sendBtn');
+  const imageInput = document.getElementById('imageInput');
+  const attachBtn = document.getElementById('attachBtn');
+
+  // Load messages from Firestore
+  function loadMessages() {
+    const q = query(collection(db, 'messages'), orderBy('timestamp'));
+    onSnapshot(q, (snapshot) => {
+      chatArea.innerHTML = ''; // Clear chat area before displaying messages
+      snapshot.forEach((doc) => {
+        const messageData = doc.data();
+        addMessage(messageData);
+      });
+    }, (error) => {
+      console.error("Error loading messages: ", error);
+    });
+  }
+
+  // Function to add a chat message to the chat area
+  function addMessage(message) {
+    const messageDiv = document.createElement('div');
+    messageDiv.classList.add('message');
+
+    const usernameDiv = document.createElement('div');
+    usernameDiv.classList.add('username');
+    usernameDiv.innerText = message.username || 'Anonymous';
+
+    const messageContent = document.createElement('div');
+    messageContent.innerText = message.text || '';
+
+    if (message.image) {
+      const img = document.createElement('img');
+      img.src = message.image;
+      messageContent.appendChild(img);
+    }
+
+    messageDiv.appendChild(usernameDiv);
+    messageDiv.appendChild(messageContent);
+    chatArea.appendChild(messageDiv);
+    chatArea.scrollTop = chatArea.scrollHeight; // Scroll to bottom
+  }
+
+  // Send message function
+  async function sendMessage() {
+    const text = messageInput.value.trim();
+    const username = currentUser ? currentUser.displayName : prompt("Enter your username:") || 'Anonymous'; // Use current user's name if logged in
+
+    const messageData = {
+      text: text,
+      username: username,
+      timestamp: serverTimestamp(),
     };
 
-    // Initialize Firebase
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
-    const auth = getAuth();
-    const storage = getStorage(app);
-
-    let currentUser = null;
-
-    const chatArea = document.getElementById('chatArea');
-    const messageInput = document.getElementById('messageInput');
-    const sendBtn = document.getElementById('sendBtn');
-    const imageInput = document.getElementById('imageInput');
-    const attachBtn = document.getElementById('attachBtn');
-    
-    // Load messages from Firestore
-    function loadMessages() {
-      const q = query(collection(db, 'messages'), orderBy('timestamp'));
-      onSnapshot(q, (snapshot) => {
-        chatArea.innerHTML = ''; // Clear chat area before displaying messages
-        snapshot.forEach((doc) => {
-          const messageData = doc.data();
-          addMessage(messageData); // No need for isOutgoing now
-        });
-      }, (error) => {
-        console.error("Error loading messages: ", error); // Handle errors
-      });
-    }
-    
-    // Function to add a chat message to the chat area
-    function addMessage(message) {
-      const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message');
-    
-      const usernameDiv = document.createElement('div');
-      usernameDiv.classList.add('username');
-      usernameDiv.innerText = message.username || 'Anonymous'; // Default to 'Anonymous' if no username
-    
-      const messageContent = document.createElement('div');
-      messageContent.innerText = message.text || '';
-    
-      if (message.image) {
-        const img = document.createElement('img');
-        img.src = message.image;
-        messageContent.appendChild(img);
-      }
-    
-      messageDiv.appendChild(usernameDiv);
-      messageDiv.appendChild(messageContent);
-      chatArea.appendChild(messageDiv);
-      chatArea.scrollTop = chatArea.scrollHeight; // Scroll to bottom
-    }
-    
-    // Send message function
-    async function sendMessage() {
-      const text = messageInput.value.trim();
-      const username = prompt("Enter your username:") || 'Anonymous'; // Prompt for username
-      if (text) {
-        const messageData = {
-          text: text,
-          username: username,
-          timestamp: serverTimestamp(),
-        };
-    
-        await addDoc(collection(db, 'messages'), messageData); // Add message to Firestore
-        messageInput.value = ''; // Clear input after sending
+    // Handle image upload if an image is selected
+    if (imageInput.files.length > 0) {
+      const file = imageInput.files[0];
+      const storageRef = ref(storage, `chat-images/${file.name}`);
+      try {
+        await uploadBytes(storageRef, file);
+        const imageUrl = await getDownloadURL(storageRef);
+        messageData.image = imageUrl; // Add image URL to the message data
+      } catch (error) {
+        console.error("Error uploading image: ", error);
       }
     }
-    
-    // Event listener for send button
-    sendBtn.addEventListener('click', sendMessage);
-    
-    // Load messages on page load
-    loadMessages();
 
-        // Handle image upload if an image is selected
-        if (imageInput.files.length > 0) {
-          const file = imageInput.files[0];
-          const storageRef = ref(storage, `chat-images/${file.name}`);
-          try {
-            await uploadBytes(storageRef, file);
-            const imageUrl = await getDownloadURL(storageRef);
-            messageData.image = imageUrl; // Add image URL to the message data
-          } catch (error) {
-            console.error("Error uploading image: ", error);
-          }
-        }
+    // Save the message to Firestore
+    try {
+      await addDoc(collection(db, 'messages'), messageData);
+      addMessage(messageData); // Display the sent message in the chat area
+      messageInput.value = ''; // Clear the input field
+      imageInput.value = ''; // Clear the image input
+      messageInput.placeholder = "Type your message..."; // Reset placeholder
+    } catch (error) {
+      console.error("Error sending message: ", error);
+    }
+  }
+
+  // Event listener for send button
+  sendBtn.addEventListener('click', sendMessage);
+
+  // Load messages on page load
+  loadMessages();
+
+  // Get the current user and load messages
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      currentUser = user; // Set current user
+      loadMessages(); // Load messages for the current user
+    } else {
+      console.log('User is not authenticated');
+      // Optionally redirect to login or show a message
+    }
+  });
+
+  // Event listeners
+  attachBtn.addEventListener('click', () => {
+    imageInput.click(); // Trigger file input click
+  });
+
+  imageInput.addEventListener('change', () => {
+    const fileName = imageInput.files[0]?.name || '';
+    messageInput.placeholder = fileName ? `Selected: ${fileName}` : "Type your message..."; // Show selected file name
+  });
+</script>
         
-        // Save the message to Firestore
-        try {
-          await addDoc(collection(db, 'messages'), messageData);
-          addMessage(messageData, true); // Display the sent message in the chat area
-          messageInput.value = ''; // Clear the input field
-          imageInput.value = ''; // Clear the image input
-        } catch (error) {
-          console.error("Error sending message: ", error);
-        }
-        }
-        }
-        
-        // Load messages from Firestore
-        function loadMessages() {
-          const q = query(collection(db, 'messages'), orderBy('timestamp'));
-          onSnapshot(q, (snapshot) => {
-            chatArea.innerHTML = ''; // Clear chat area before displaying messages
-            snapshot.forEach((doc) => {
-              const messageData = doc.data();
-              const isOutgoing = messageData.userId === currentUser.uid; // Check if the message is outgoing
-              addMessage(messageData, isOutgoing);
-            });
-          }, (error) => {
-            console.error("Error loading messages: ", error); // Handle errors
-          });
-        }
-        
-        // Get the current user and load messages
-        onAuthStateChanged(auth, (user) => {
-          if (user) {
-            currentUser = user; // Set current user
-            loadMessages(); // Load messages for the current user
-          } else {
-            console.log('User is not authenticated');
-            // Optionally redirect to login or show a message
-          }
-        });
-        
-        // Event listeners
-        sendBtn.addEventListener('click', sendMessage);
-        messageInput.addEventListener('keypress', (event) => {
-          if (event.key === 'Enter') {
-            sendMessage();
-          }
-        });
-        
-        attachBtn.addEventListener('click', () => {
-          imageInput.click(); // Trigger file input click
-        });
-        
-        imageInput.addEventListener('change', () => {
-          const fileName = imageInput.files[0]?.name || '';
-          if (fileName) {
-            messageInput.placeholder = `Selected: ${fileName}`; // Show selected file name
-          } else {
-            messageInput.placeholder = "Type your message..."; // Reset placeholder
-          }
-        });
-        </script> 
         </body> 
         </html>
