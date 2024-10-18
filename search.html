@@ -218,72 +218,72 @@
     }
   });
 
-  // Search functionality for groups
-  searchBtn.addEventListener('click', async () => {
-    const searchTerm = searchInput.value.trim().toLowerCase();
-
-    if (!searchTerm) return;
-
-    // Clear previous results
-    resultsContainer.innerHTML = '';
-
-    // Simulate search for groups
-    if (searchTerm === 'dawnland') {
-      displayGroup({
-        groupName: 'DAWNLAND',
-        groupId: 'dawnland',
-        profilePicture: 'https://www.example.com/dawnland_profile_image.jpg'
-      });
-    } else if (searchTerm === 'ghost.ind') {
-      displayGroup({
-        groupName: 'TEAM GHOST',
-        groupId: 'ghost.id',
-        profilePicture: 'https://cdn.dribbble.com/userupload/4362414/file/original-3a2e83227f22bfc2dbda1dd8da5d8692.png'
-      });
-    } else {
-      resultsContainer.innerHTML = '<p>No groups found.</p>';
-    }
-  });
-
-  // Display a group in the results
-  function displayGroup(groupData) {
-    const groupItem = document.createElement('div');
-    groupItem.classList.add('group-item');
-    groupItem.innerHTML = `
-      <img src="${groupData.profilePicture}" alt="${groupData.groupName} Profile">
-      <h3>${groupData.groupName}</h3>
-    `;
-
-    // Add click event to show popup
-    groupItem.addEventListener('click', () => {
-      selectedGroup = groupData;
-      joinGroupModal.classList.add('active');
-    });
-
-    resultsContainer.appendChild(groupItem);
-  }
-
-  // Join group functionality
-  joinBtn.addEventListener('click', async () => {
-    if (selectedGroup) {
-      try {
-        // Save the group to the user's home page in Firestore
-        await addDoc(collection(db, 'userGroups'), {
-          userId: currentUser.uid,
-          groupId: selectedGroup.groupId,
-          groupName: selectedGroup.groupName,
-          profilePicture: selectedGroup.profilePicture
-        });
-
-        // Redirect to home and close the modal
-        joinGroupModal.classList.remove('active');
-        window.location.href = 'home.html'; // Redirect to the home page
-      } catch (error) {
-        console.error("Error joining group: ", error);
-        alert("Failed to join the group. Please try again.");
-      }
-    }
-  });
+ // Search functionality for groups
+ searchBtn.addEventListener('click', async () => {
+   const searchTerm = searchInput.value.trim().toLowerCase();
+ 
+   if (!searchTerm) return;
+ 
+   // Clear previous results
+   resultsContainer.innerHTML = '';
+ 
+   // Simulate search for groups
+   if (searchTerm === 'dawnland') {
+     displayGroup({
+       groupName: 'DAWNLAND',
+       groupId: 'dawnland',
+       profilePicture: 'https://www.example.com/dawnland_profile_image.jpg'
+     });
+   } else if (searchTerm === 'ghost.ind') {
+     displayGroup({
+       groupName: 'TEAM GHOST',
+       groupId: 'ghost.id',
+       profilePicture: 'https://cdn.dribbble.com/userupload/4362414/file/original-3a2e83227f22bfc2dbda1dd8da5d8692.png'
+     });
+   } else {
+     resultsContainer.innerHTML = '<p>No groups found.</p>';
+   }
+ });
+ 
+ // Display a group in the results
+ function displayGroup(groupData) {
+   const groupItem = document.createElement('div');
+   groupItem.classList.add('group-item');
+   groupItem.innerHTML = `
+         <img src="${groupData.profilePicture}" alt="${groupData.groupName} Profile">
+         <h3>${groupData.groupName}</h3>
+     `;
+ 
+   // Add click event to show popup
+   groupItem.addEventListener('click', () => {
+     selectedGroup = groupData;
+     joinGroupModal.classList.add('active');
+   });
+ 
+   resultsContainer.appendChild(groupItem);
+ }
+ 
+ // Join group functionality
+ joinBtn.addEventListener('click', async () => {
+   if (selectedGroup) {
+     try {
+       // Save the group to the user's home page in Firestore
+       await addDoc(collection(db, 'userGroups'), {
+         userId: currentUser.uid,
+         groupId: selectedGroup.groupId,
+         groupName: selectedGroup.groupName,
+         profilePicture: selectedGroup.profilePicture
+       });
+ 
+       // Redirect to home and close the modal
+       joinGroupModal.classList.remove('active');
+       window.location.href = 'home.html'; // Redirect to the home page
+     } catch (error) {
+       console.error("Error joining group: ", error);
+       alert("Failed to join the group. Please try again.");
+     }
+   }
+ });
 
   // Close modal functionality
   closeModalBtn.addEventListener('click', () => {
