@@ -288,8 +288,26 @@
       if (user) {
         currentUser = user; // Set current user
         loadMessages(); // Load messages for the current user
+      } else {
+        console.log('User is not authenticated');
+        // Optionally redirect to login or show a message
       }
     });
+    
+    // Load messages from Firestore
+    function loadMessages() {
+      const q = query(collection(db, 'messages'), orderBy('timestamp'));
+      onSnapshot(q, (snapshot) => {
+        chatArea.innerHTML = ''; // Clear chat area before displaying messages
+        snapshot.forEach((doc) => {
+          const messageData = doc.data();
+          const isOutgoing = messageData.userId === currentUser.uid; // Check if the message is outgoing
+          addMessage(messageData, isOutgoing);
+        });
+      }, (error) => {
+        console.error("Error loading messages: ", error); // Handle errors
+      });
+    }
 
     // Event listeners
     sendBtn.addEventListener('click', sendMessage);
@@ -313,4 +331,4 @@
     });
   </script>
 </body>
-</html>
+</html>""
