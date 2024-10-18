@@ -266,17 +266,22 @@
   // Join group functionality
   joinBtn.addEventListener('click', async () => {
     if (selectedGroup) {
-      // Save the group to the user's home page in Firestore
-      await addDoc(collection(db, 'userGroups'), {
-        userId: currentUser.uid,
-        groupId: selectedGroup.groupId,
-        groupName: selectedGroup.groupName,
-        profilePicture: selectedGroup.profilePicture
-      });
+      try {
+        // Save the group to the user's home page in Firestore
+        await addDoc(collection(db, 'userGroups'), {
+          userId: currentUser.uid,
+          groupId: selectedGroup.groupId,
+          groupName: selectedGroup.groupName,
+          profilePicture: selectedGroup.profilePicture
+        });
 
-      // Redirect to home and close the modal
-      joinGroupModal.classList.remove('active');
-      window.location.href = 'home.html'; // Redirect to the home page
+        // Redirect to home and close the modal
+        joinGroupModal.classList.remove('active');
+        window.location.href = 'home.html'; // Redirect to the home page
+      } catch (error) {
+        console.error("Error joining group: ", error);
+        alert("Failed to join the group. Please try again.");
+      }
     }
   });
 
@@ -285,5 +290,6 @@
     joinGroupModal.classList.remove('active');
   });
 </script>
+
 </body>
 </html>

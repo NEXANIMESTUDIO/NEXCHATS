@@ -174,8 +174,10 @@
 
     <!-- Input Bar -->
     <div class="input-bar">
+      <input type="file" id="imageInput" accept="image/*" style="display:none;">
       <input type="text" id="messageInput" placeholder="Type your message...">
       <button id="sendBtn"><i class="material-icons">send</i></button>
+      <button id="attachBtn"><i class="material-icons">attach_file</i></button>
     </div>
   </div>
 
@@ -207,9 +209,7 @@
   const messageInput = document.getElementById('messageInput');
   const sendBtn = document.getElementById('sendBtn');
   const imageInput = document.getElementById('imageInput');
-  const sidebar = document.getElementById('sidebar');
-  const closeSidebarBtn = document.getElementById('closeSidebarBtn');
-  const onlineUsersList = document.getElementById('onlineUsersList');
+  const attachBtn = document.getElementById('attachBtn');
 
   // Function to add a chat message to the chat area
   function addMessage(message, isOutgoing) {
@@ -274,14 +274,6 @@
     });
   }
 
-  // Toggle sidebar visibility
-  function toggleSidebar() {
-    sidebar.classList.toggle('open');
-  }
-
-  // Close sidebar
-  closeSidebarBtn.addEventListener('click', toggleSidebar);
-
   // Back button to go back (if applicable)
   document.getElementById('backBtn').addEventListener('click', () => {
     window.history.back();
@@ -297,30 +289,21 @@
     }
   });
 
+  // Toggle image input visibility
+  attachBtn.addEventListener('click', () => {
+    imageInput.click(); // Trigger file input click
+  });
+
   // Firebase authentication state observer
   onAuthStateChanged(auth, (user) => {
     if (user) {
       currentUser = user;
       loadMessages();
-      // Load online users
-      loadOnlineUsers();
     } else {
       // Redirect to login page or show a login modal
       window.location.href = 'login.html'; // Redirect to your login page
     }
   });
-
-  // Load online users (you can implement your logic for online users)
-  function loadOnlineUsers() {
-    // This is a placeholder; you need to implement real online user tracking
-    const users = ['User1', 'User2', 'User3']; // Example user list
-    onlineUsersList.innerHTML = ''; // Clear the list
-    users.forEach((user) => {
-      const li = document.createElement('li');
-      li.innerText = user;
-      onlineUsersList.appendChild(li);
-    });
-  }
 
   // Initialize Firebase services
   loadMessages();
