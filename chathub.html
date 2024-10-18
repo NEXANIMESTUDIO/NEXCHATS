@@ -197,6 +197,205 @@
     appId: "1:141566009337:web:c63335bd2ef19c7a816728"
   };
 
+  <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CHAT HUB - NEX STUDIO</title>
+
+  <!-- Google Material Icons -->
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Arial', sans-serif;
+    }
+
+    body {
+      background: url('img/cbg.png') no-repeat center center fixed;
+      background-size: cover;
+      overflow-x: hidden;
+      color: #fff;
+    }
+
+    .container {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      justify-content: space-between;
+    }
+
+    /* Title Bar */
+    .title-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background-color: rgba(20, 20, 20, 0.9);
+      padding: 15px 20px;
+      border-bottom: 2px solid #00ffcc;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    .title-bar img {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      margin-right: 10px;
+    }
+
+    .title-bar h2 {
+      font-size: 18px;
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .title-bar i {
+      font-size: 28px;
+      cursor: pointer;
+      color: #00ffcc;
+    }
+
+    /* Chat Area */
+    .chat-area {
+      flex-grow: 1;
+      overflow-y: auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .message {
+      max-width: 60%;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 15px;
+      color: #fff;
+      animation: fadeIn 0.3s ease;
+      position: relative;
+    }
+
+    .message img {
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      position: absolute;
+      top: -10px;
+      left: -50px;
+    }
+
+    .outgoing {
+      margin-left: auto;
+      background: linear-gradient(135deg, #ff00cc 0%, #3333ff 100%);
+    }
+
+    .incoming {
+      margin-right: auto;
+      background: linear-gradient(135deg, #00ff00 0%, #0099ff 100%);
+    }
+
+    .username {
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+
+    /* Input Bar */
+    .input-bar {
+      display: flex;
+      padding: 10px;
+      background-color: rgba(20, 20, 20, 0.9);
+      position: relative;
+      border-top: 2px solid #00ffcc;
+      align-items: center;
+    }
+
+    .input-bar input {
+      flex-grow: 1;
+      padding: 12px;
+      border-radius: 25px;
+      border: none;
+      background-color: #444;
+      color: #fff;
+      font-size: 16px;
+      outline: none;
+      margin-right: 10px;
+    }
+
+    .input-bar button {
+      background-color: transparent;
+      border: none;
+      cursor: pointer;
+      font-size: 24px;
+      color: #00ffcc;
+    }
+
+    .input-bar button:hover {
+      color: #00ff66;
+    }
+
+    /* Image Upload Button */
+    .input-bar #imageUpload {
+      font-size: 24px;
+      cursor: pointer;
+      margin-right: 10px;
+      color: #00ffcc;
+    }
+
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <!-- Title Bar -->
+    <div class="title-bar">
+      <i class="material-icons" id="backBtn">arrow_back</i>
+      <h2>
+        <img src="https://cdn.dribbble.com/userupload/7299809/file/original-b4fb6699dfb8cac772536f6266696db5.jpg" alt="Group Profile">
+        CHAT HUB
+      </h2>
+      <i class="material-icons">more_vert</i>
+    </div>
+
+    <!-- Chat Area -->
+    <div class="chat-area" id="chatArea">
+      <!-- Chat messages will be dynamically added here -->
+    </div>
+
+    <!-- Input Bar -->
+    <div class="input-bar">
+      <input type="file" id="imageInput" accept="image/*" style="display:none;">
+      <input type="text" id="messageInput" placeholder="Type your message...">
+      <button id="sendBtn"><i class="material-icons">send</i></button>
+      <button id="attachBtn"><i class="material-icons">attach_file</i></button>
+    </div>
+  </div>
+
+  <!-- Firebase SDK -->
+  <script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+  import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-storage.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyA-GWZtFJsLp2lpwXCyMxHiBuwQwmRrf7E",
+    authDomain: "nex-chats-80c04.firebaseapp.com",
+    projectId: "nex-chats-80c04",
+    storageBucket: "nex-chats-80c04.appspot.com",
+    messagingSenderId: "141566009337",
+    appId: "1:141566009337:web:c63335bd2ef19c7a816728"
+  };
+
   // Initialize Firebase and Firestore
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);

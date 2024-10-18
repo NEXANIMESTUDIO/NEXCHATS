@@ -152,6 +152,171 @@
       50% { transform: translateY(-5px); }
       100% { transform: translateY(0); }
     }
+    
+    /* Modal Styles */
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; 
+    z-index: 1000; 
+    left: 0;
+    top: 0;
+    width: 100%; 
+    height: 100%; 
+    overflow: auto; 
+    background-color: rgba(0, 0, 0, 0.8); 
+    animation: fadeIn 0.5s; /* Animation for the modal appearing */
+}
+
+.modal-content {
+    background: linear-gradient(145deg, #1e1e1e, #2a2a2a);
+    box-shadow: 20px 20px 60px #0f0f0f, -20px -20px 60px #3f3f3f; /* Futuristic shadow */
+    border-radius: 15px;
+    padding: 30px;
+    margin: 10% auto; 
+    width: 90%; 
+    max-width: 400px; 
+    animation: slideIn 0.5s; /* Animation for the content appearing */
+}
+
+.close {
+    color: #fff;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: color 0.3s;
+}
+
+.close:hover,
+.close:focus {
+    color: #00ff88; /* Change color on hover */
+}
+
+h2 {
+    color: #00ff88; /* Futuristic title color */
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: none;
+    border-radius: 5px;
+    box-shadow: inset 3px 3px 10px #0f0f0f, inset -3px -3px 10px #3f3f3f; /* Inner shadow */
+    background-color: #2a2a2a;
+    color: #fff;
+    transition: all 0.3s ease;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: 0 0 5px #00ff88; /* Glow effect on focus */
+}
+
+button {
+    width: 100%;
+    padding: 10px;
+    background-color: #00ff88;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: bold;
+    color: #121212;
+    transition: background-color 0.3s, transform 0.3s;
+}
+
+button:hover {
+    background-color: #00cc70; /* Darker shade on hover */
+    transform: scale(1.05); /* Slightly scale on hover */
+}
+
+/* Keyframe animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideIn {
+    from {
+        transform: translateY(-20px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+  .popup {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+}
+
+.popup-content {
+    background-color: #292929;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 80%; /* Could be more or less, depending on screen size */
+    border-radius: 10px;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+}
+
+.popup h2 {
+    color: #00ff88;
+}
+
+.popup input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+}
+
+.popup button {
+    background-color: #00ff88;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.popup button:hover {
+    background-color: #009f6b;
+}
+
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close:hover,
+.close:focus {
+    color: #00ff88;
+    text-decoration: none;
+    cursor: pointer;
+}
+
   </style>
 </head>
 <body>
@@ -193,6 +358,26 @@
     <div class="nav-item" id="profileNav">
       <i class="material-icons">person</i>
       <p>Profile</p>
+    </div>
+  </div>
+  
+  <!-- Join Group Popup -->
+  <div id="joinGroupModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeModal">&times;</span>
+      <h2>Join Group</h2>
+      <input type="text" id="groupIdInput" placeholder="Enter Group ID" />
+      <button id="joinGroupBtn">Join</button>
+    </div>
+  </div>
+  
+  <!-- Group Join Popup -->
+  <div class="popup" id="joinGroupPopup">
+    <div class="popup-content">
+      <span class="close" id="closePopup">&times;</span>
+      <h2>Join a Group</h2>
+      <input type="text" id="groupIdInput" placeholder="Enter Group ID">
+      <button id="joinGroupBtn">Join</button>
     </div>
   </div>
 
@@ -310,6 +495,57 @@
     profileNav.addEventListener('click', () => {
       window.location.href = 'profile.html';
     });
+    
+   const joinGroupPopup = document.getElementById('joinGroupPopup');
+   const joinGroupBtn = document.getElementById('joinGroupBtn');
+   const groupIdInput = document.getElementById('groupIdInput');
+   const closePopup = document.getElementById('closePopup');
+   
+   // Open the join group popup when the search icon is clicked
+   searchIcon.addEventListener('click', () => {
+     joinGroupPopup.style.display = 'block';
+   });
+   
+   // Close the popup
+   closePopup.addEventListener('click', () => {
+     joinGroupPopup.style.display = 'none';
+   });
+   
+   // Join group functionality
+   joinGroupBtn.addEventListener('click', async () => {
+     const groupId = groupIdInput.value.trim();
+   
+     if (!groupId) {
+       alert("Please enter a group ID.");
+       return;
+     }
+   
+     // Simulate group checking and joining logic (for example, checking if the group exists)
+     if (groupId === 'dawnland') {
+       // Save the group to the user's home page in Firestore
+       await addDoc(collection(db, 'userGroups'), {
+         userId: currentUser.uid,
+         groupId: 'dawnland',
+         groupName: 'DAWNLAND',
+         profilePicture: 'https://www.example.com/dawnland_profile_image.jpg'
+       });
+   
+       // Add the new group to the homepage
+       loadGroups(); // Refresh the groups display
+   
+       // Close the popup
+       joinGroupPopup.style.display = 'none';
+     } else {
+       alert("Group ID not found.");
+     }
+   });
+   
+   // Close the popup if the user clicks anywhere outside of it
+   window.onclick = function(event) {
+     if (event.target == joinGroupPopup) {
+       joinGroupPopup.style.display = "none";
+     }
+   };
 
   </script>
 </body>
