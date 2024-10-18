@@ -238,7 +238,7 @@
     // Send message function
     async function sendMessage() {
       const text = messageInput.value.trim();
-      if (text || imageInput.files.length > 0) {
+      if (currentUser && (text || imageInput.files.length > 0)) {
         const messageData = {
           text: text,
           timestamp: serverTimestamp(),
@@ -257,7 +257,7 @@
             console.error("Error uploading image: ", error);
           }
         }
-
+        
         // Save the message to Firestore
         try {
           await addDoc(collection(db, 'messages'), messageData);
@@ -267,68 +267,55 @@
         } catch (error) {
           console.error("Error sending message: ", error);
         }
-      }
-    }
-
-    // Load messages from Firestore
-    function loadMessages() {
-      const q = query(collection(db, 'messages'), orderBy('timestamp'));
-      onSnapshot(q, (snapshot) => {
-        chatArea.innerHTML = ''; // Clear chat area before displaying messages
-        snapshot.forEach((doc) => {
-          const messageData = doc.data();
-          const isOutgoing = messageData.userId === currentUser.uid; // Check if the message is outgoing
-          addMessage(messageData, isOutgoing);
+        }
+        }
+        
+        // Load messages from Firestore
+        function loadMessages() {
+          const q = query(collection(db, 'messages'), orderBy('timestamp'));
+          onSnapshot(q, (snapshot) => {
+            chatArea.innerHTML = ''; // Clear chat area before displaying messages
+            snapshot.forEach((doc) => {
+              const messageData = doc.data();
+              const isOutgoing = messageData.userId === currentUser.uid; // Check if the message is outgoing
+              addMessage(messageData, isOutgoing);
+            });
+          }, (error) => {
+            console.error("Error loading messages: ", error); // Handle errors
+          });
+        }
+        
+        // Get the current user and load messages
+        onAuthStateChanged(auth, (user) => {
+          if (user) {
+            currentUser = user; // Set current user
+            loadMessages(); // Load messages for the current user
+          } else {
+            console.log('User is not authenticated');
+            // Optionally redirect to login or show a message
+          }
         });
-      });
-    }
-
-    // Get the current user and load messages
-    onAuthStateChanged(auth, (user) => {
-      if (user) {
-        currentUser = user; // Set current user
-        loadMessages(); // Load messages for the current user
-      } else {
-        console.log('User is not authenticated');
-        // Optionally redirect to login or show a message
-      }
-    });
-    
-    // Load messages from Firestore
-    function loadMessages() {
-      const q = query(collection(db, 'messages'), orderBy('timestamp'));
-      onSnapshot(q, (snapshot) => {
-        chatArea.innerHTML = ''; // Clear chat area before displaying messages
-        snapshot.forEach((doc) => {
-          const messageData = doc.data();
-          const isOutgoing = messageData.userId === currentUser.uid; // Check if the message is outgoing
-          addMessage(messageData, isOutgoing);
+        
+        // Event listeners
+        sendBtn.addEventListener('click', sendMessage);
+        messageInput.addEventListener('keypress', (event) => {
+          if (event.key === 'Enter') {
+            sendMessage();
+          }
         });
-      }, (error) => {
-        console.error("Error loading messages: ", error); // Handle errors
-      });
-    }
-
-    // Event listeners
-    sendBtn.addEventListener('click', sendMessage);
-    messageInput.addEventListener('keypress', (event) => {
-      if (event.key === 'Enter') {
-        sendMessage();
-      }
-    });
-
-    attachBtn.addEventListener('click', () => {
-      imageInput.click(); // Trigger file input click
-    });
-
-    imageInput.addEventListener('change', () => {
-      const fileName = imageInput.files[0]?.name || '';
-      if (fileName) {
-        messageInput.placeholder = `Selected: ${fileName}`; // Show selected file name
-      } else {
-        messageInput.placeholder = "Type your message..."; // Reset placeholder
-      }
-    });
-  </script>
-</body>
-</html>""
+        
+        attachBtn.addEventListener('click', () => {
+          imageInput.click(); // Trigger file input click
+        });
+        
+        imageInput.addEventListener('change', () => {
+          const fileName = imageInput.files[0]?.name || '';
+          if (fileName) {
+            messageInput.placeholder = `Selected: ${fileName}`; // Show selected file name
+          } else {
+            messageInput.placeholder = "Type your message..."; // Reset placeholder
+          }
+        });
+        </script> 
+        </body> 
+        </html>
