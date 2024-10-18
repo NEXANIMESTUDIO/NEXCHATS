@@ -210,40 +210,66 @@
     const sendBtn = document.getElementById('sendBtn');
     const imageInput = document.getElementById('imageInput');
     const attachBtn = document.getElementById('attachBtn');
-
+    
+    // Load messages from Firestore
+    function loadMessages() {
+      const q = query(collection(db, 'messages'), orderBy('timestamp'));
+      onSnapshot(q, (snapshot) => {
+        chatArea.innerHTML = ''; // Clear chat area before displaying messages
+        snapshot.forEach((doc) => {
+          const messageData = doc.data();
+          addMessage(messageData); // No need for isOutgoing now
+        });
+      }, (error) => {
+        console.error("Error loading messages: ", error); // Handle errors
+      });
+    }
+    
     // Function to add a chat message to the chat area
-    function addMessage(message, isOutgoing) {
+    function addMessage(message) {
       const messageDiv = document.createElement('div');
-      messageDiv.classList.add('message', isOutgoing ? 'outgoing' : 'incoming');
-      
+      messageDiv.classList.add('message');
+    
       const usernameDiv = document.createElement('div');
       usernameDiv.classList.add('username');
-      usernameDiv.innerText = currentUser ? currentUser.displayName : 'Anonymous';
-      
+      usernameDiv.innerText = message.username || 'Anonymous'; // Default to 'Anonymous' if no username
+    
       const messageContent = document.createElement('div');
       messageContent.innerText = message.text || '';
-
+    
       if (message.image) {
         const img = document.createElement('img');
         img.src = message.image;
         messageContent.appendChild(img);
       }
-
+    
       messageDiv.appendChild(usernameDiv);
       messageDiv.appendChild(messageContent);
       chatArea.appendChild(messageDiv);
       chatArea.scrollTop = chatArea.scrollHeight; // Scroll to bottom
     }
-
+    
     // Send message function
     async function sendMessage() {
       const text = messageInput.value.trim();
-      if (currentUser && (text || imageInput.files.length > 0)) {
+      const username = prompt("Enter your username:") || 'Anonymous'; // Prompt for username
+      if (text) {
         const messageData = {
           text: text,
+          username: username,
           timestamp: serverTimestamp(),
-          userId: currentUser.uid,
         };
+    
+        await addDoc(collection(db, 'messages'), messageData); // Add message to Firestore
+        messageInput.value = ''; // Clear input after sending
+      }
+    }
+    
+    // Event listener for send button
+    sendBtn.addEventListener('click', sendMessage);
+    
+    // Load messages on page load
+    loadMessages();
 
         // Handle image upload if an image is selected
         if (imageInput.files.length > 0) {
